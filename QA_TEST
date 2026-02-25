@@ -1,1 +1,440 @@
+ASSIGNMENT for CIPRO AI
+1) Test Cases for LoginPage
+🔴 A. Critical Functional Test Cases
+TC-01: Successful login
+Precondition: Valid email & password exist
+
+
+Steps:
+
+
+Enter valid email
+
+
+Enter valid password
+
+
+Tap Sign In
+
+
+Expected:
+
+
+API called
+
+
+Success toast shown
+
+
+Navigates to Personalized Impact Of Lifesytle Factors (MainActivity)
+
+
+
+TC-02: Invalid credentials
+Enter wrong email/password
+
+
+Expected: “Credentials Mismatch” toast shown, stay on login screen
+
+
+
+TC-03: Empty email
+Email empty, password filled
+
+
+Expected: Stayed on the Login Page and also should show an error message [No API call (currently silent → bug)]
+
+
+
+TC-04: Empty password
+Password empty, email filled
+
+
+Expected: Stayed on the Login Page (No API call)
+
+
+
+TC-05: Both fields empty
+Expected: Validation message (currently missing)
+
+
+
+TC-06: Network failure
+Turn off internet
+
+
+Expected:
+
+
+“Network Issue encountered” toast
+
+
+No crash
+
+
+
+TC-07: Slow network / timeout
+Simulate delay
+
+
+Expected: App remains responsive (no freeze)
+
+
+
+🟠 B. Edge Cases
+TC-08: Email format validation
+Enter invalid email format
+
+
+Expected: Validation error (currently missing)
+
+
+
+TC-09: Special characters in password
+Input !@#$$%
+
+
+Expected: API still works
+
+
+
+TC-10: Long input values
+Email/password > 255 chars
+
+
+Expected: No crash
+
+
+
+TC-11: Rotate screen during API call
+Start login → rotate device
+
+
+Expected: No duplicate calls / crash
+
+
+
+TC-12: Rapid multiple clicks
+Tap Sign In multiple times quickly
+
+
+Expected: Single API call (currently not handled)
+
+
+
+TC-13: API returns 500 error
+Expected: Error toast shown
+
+
+
+TC-14: API returns unexpected body
+Expected: No crash
+TC-15: FLOATING BUTTON TEST CASES
+Able to move the button on entire screen
+On clicking on the button dialog is opened
+On clicking on all the contents of the dialog  and check the items which are not supported is greyedout
+Settings
+Show keyboard shortcuts
+Show clipboard
+Show translate
+Show emoji
+Show on-screen keyboard
+Voice
+Show symbols keyboard
+Switch to horizontal toolbar
+
+
+🟡 C. Small but Valuable Test Cases
+Copy-paste into fields
+
+
+Autofill credentials
+
+
+Keyboard “Done” action triggers login
+
+
+Back button during API call
+
+
+Background → foreground app during login
+
+
+Memory usage during repeated logins
+
+
+
+
+
+
+⚠️ 2) Leaks / Risks / Bugs in Current Implementation
+🔴 Security Issues
+Credentials logged in console
+
+
+System.out.println("username = "+ username);
+System.out.println("userpassword = "+userpassword);
+👉 Major security leak (password exposure)
+
+🔴 Missing Input Validation
+No empty field error message
+
+
+No email format validation
+
+
+No password constraints
+
+
+
+🔴 Multiple API Call Risk
+Button not disabled during request
+ 👉 Causes duplicate login calls
+
+
+
+🔴 Lifecycle Memory Leak Risk
+Retrofit callback holds Activity reference
+
+
+If Activity destroyed → callback may leak context
+
+
+
+🔴 Hardcoded Base URL
+.baseUrl("https://api.cipra.ai:5000/")
+👉 Not environment friendly (dev/stage/prod)
+
+🔴 Poor Error Handling
+Same toast for all failures
+
+
+No parsing of error body
+
+
+No retry mechanism
+
+
+
+🟠 UX Issues
+No loading indicator
+
+
+No keyboard hiding
+
+
+No error hints on input fields
+
+
+No navigation guard (user can press back to login after success)
+
+
+
+🟠 Naming / Code Quality Issues
+Typo: inintActions() instead of initActions()
+
+
+Method naming not Java standard (VerifyUserCredentials)
+
+
+Retrofit creation inside Activity (tight coupling)
+
+
+
+🚀 3) Improvements for Better Testing Environment
+✅ Architecture Improvements
+Move API logic to Repository
+
+
+Use ViewModel + LiveData / Flow
+
+
+Follow MVVM or Clean Architecture
+
+
+👉 Enables unit testing without UI
+
+✅ Dependency Injection
+Use Hilt / Dagger
+
+
+Inject Retrofit
+
+
+Mock Retrofit for tests
+
+
+
+✅ Testability Enhancements
+Add interface abstraction for network layer
+
+
+Enable mocking with Mockito
+
+
+
+✅ UI Test Improvements
+Add loading spinner state
+
+
+Disable button during request
+
+
+Add error state in UI
+
+
+
+✅ Logging Improvements
+Use Log.d() instead of System.out
+
+
+Remove password logging
+
+
+Add structured logging
+
+
+
+✅ Environment Config
+Use BuildConfig for URLs
+
+
+buildConfigField "String", "BASE_URL", "\"https://api.cipra.ai:5000/\""
+
+✅ Add Automated Tests
+Unit tests
+Validation logic
+
+
+ViewModel login logic
+
+
+Integration tests
+Retrofit API mock test
+
+
+UI tests (Espresso)
+Button click → API call
+
+
+Error message display
+
+
+Navigation verification
+
+
+
+✅ Network Testing Tools
+MockWebServer for API simulation
+
+
+Charles Proxy for debugging
+
+
+Firebase Test Lab for device testing
+
+
+
+⭐ Recommendations 
+Add analytics for login failures
+
+
+Add retry logic for network issues
+
+
+Add rate limiting
+
+
+Add accessibility tests
+
+
+Add security testing (MITM, token storage)
+
+
+
+1) API Contract Test Checklist (Login API)
+🔴 Request Validation
+Verify HTTP method = POST
+
+
+Verify endpoint = /login
+
+
+Validate request headers
+
+
+Content-Type: application/json
+
+
+Authorization (if required)
+
+
+Validate request body fields
+
+
+username present
+
+
+password present
+
+
+field types correct
+
+
+
+🔴 Response Validation
+Verify status codes
+
+
+200 → success
+
+
+401 → invalid credentials
+
+
+400 → bad request
+
+
+500 → server error
+
+
+
+🟠 Response Schema Validation
+Response JSON structure matches contract
+
+
+No unexpected fields
+
+
+Required fields present (token, userId, etc.)
+
+
+
+🟠 Negative Contract Tests
+Missing username
+
+
+Missing password
+
+
+Invalid email format
+
+
+SQL injection payload
+
+
+Oversized payload
+
+
+
+🟡 Performance Contract Tests
+Response time < 2s
+
+
+No schema change under load
+
+
+API handles concurrent requests
+
+
 
